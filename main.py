@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from replit import db
 import os
+import time
 import requests
 import randfacts
 from pyrandmeme import *
@@ -46,9 +47,8 @@ async def meme(ctx):
 @bot.command(
   help='Creates a poll in the channel called "voting". There must be a voting channel for this to work'
 )
-async def poll(ctx, issue):
+async def poll(ctx, *, issue):
   vote_channel = discord.utils.get(ctx.guild.channels, name='voting')
-  general = discord.utils.get(ctx.guild.channels, name='general')
 
   await ctx.message.delete()
 
@@ -57,9 +57,32 @@ async def poll(ctx, issue):
   for emoji in emojis:
     await poll.add_reaction(emoji)
 
-@bot.event
-async def on_reaction_add(reaction, user):
-  if reaction.emoji == '👍'
+  def check(reaction, user):
+    return user != '808555253317894163' and str(reaction.emoji) in ['👍', '👎']
+
+  yay = 0
+  nay = -1
+  loop = 0
+
+  while loop == 0:
+    try:
+      reaction, user = await bot.wait_for('reaction_add', timeout=10.0, check=check)
+      if reaction.emoji == '👍' and user != '808555253317894163':
+        yay += 1
+      elif reaction.emoji == '👎' and user != '808555253317894163':
+        nay += 1
+      
+    except:
+      await ctx.send('Yay: {}\nNay: {}'.format(yay, nay))
+
+      if yay > nay:
+        await ctx.send('The vote comes out to yay!')
+      elif yay < nay:
+        await ctx.send('The vote comes out to nay!')
+      elif yay == nay:
+        await ctx.send('The vote is a tie!')
+      
+      loop = 1
 
 keep_alive()
 bot.run(os.getenv('TOKEN'))
