@@ -1,3 +1,4 @@
+from discord.utils import get
 import discord
 from discord.ext import commands
 import os
@@ -64,11 +65,14 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
     await ctx.send('Time unit invalid! Valid time units are minutes, hours, and days!')
     return
 
-  vote_channel = discord.utils.get(ctx.guild.channels, name='voting')
+  vote_channel = get(ctx.guild.channels, name='voting')
 
   await ctx.message.delete()
 
   poll = await vote_channel.send('@everyone ' + issue)
+  pollID = poll.id
+
+  await ctx.send('Poll sent!')
 
   for emoji in emojis:
     await poll.add_reaction(emoji)
@@ -83,13 +87,18 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
   while loop == 0:
     try:
       reaction, user = await bot.wait_for('reaction_add', timeout=timeLimit, check=check)
-      if reaction.emoji == '👍' and user != '808555253317894163':
-        yay += 1
-      if reaction.emoji == '👎' and user != '808555253317894163':
-        nay += 1
       
     except:
-      await ctx.send('Yay: {}\nNay: {}'.format(yay, nay))
+      msg = await vote_channel.fetch_message(pollID)
+      
+      thumbUps = get(msg.reactions, emoji='👍')
+      yay = thumbUps.count - 1
+
+      thumbDowns = get(msg.reactions, emoji='👎')
+      nay = thumbDowns.count - 1
+
+
+      await ctx.send(f'@everyone Here are the results of poll with the issue "{issue}": \nYay: {yay}\nNay: {nay}')
 
       if yay > nay:
         await ctx.send('The vote comes out to yay!')
