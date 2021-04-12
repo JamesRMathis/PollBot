@@ -22,6 +22,7 @@ def get_quote():
 @bot.event
 async def on_ready():
   print('Bot is ready')
+  await bot.change_presence(activity=discord.Game(name="use $help"))
 
 @bot.command(
   help='Sends an inspiring quote'
@@ -42,6 +43,12 @@ async def funfact(ctx):
 )
 async def meme(ctx):
   await ctx.send(embed=await pyrandmeme())
+
+@bot.command(
+  help='Shows the latency of the bot for you'
+)
+async def ping(ctx):
+  await ctx.send(f'Latency: {round(bot.latency * 1000)} ms')
 
 @bot.command(
   help='Creates a poll in the channel called "voting". There must be a voting channel for this to work. If the issue is more than one word long, you must put it in quotes "like this." The time unit defaults to being seconds, but you can specify it to be minutes, hours, or days. They must be spelled out completely and correctly, but capitalization does not matter'
@@ -71,6 +78,19 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
 
   poll = await vote_channel.send('@everyone ' + issue)
   pollID = poll.id
+
+  issueChars = list(issue)
+  issue = ''
+  broke = False
+
+  for count, value in enumerate(issueChars):
+    if count > 9:
+      broke = True
+      break
+
+    issue = issue + str(issueChars[count])
+  if broke:
+    issue = issue + '...'
 
   await ctx.send('Poll sent!')
 
