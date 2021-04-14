@@ -7,9 +7,14 @@ import randfacts
 from pyrandmeme import *
 import json
 from keep_alive import keep_alive
+from replit import db
 
 
-bot = commands.Bot(command_prefix= '$')
+def get_prefix(client, message):
+  prefix = db[str(message.guild.id)]
+  return prefix
+
+bot = commands.Bot(command_prefix=get_prefix)
 
 emojis = ['👍', '👎']
 
@@ -23,6 +28,18 @@ def get_quote():
 async def on_ready():
   print('Bot is ready')
   await bot.change_presence(activity=discord.Game(name="use $help"))
+
+@bot.event
+async def on_guild_join(guild): 
+  db[str(guild.id)] = '$'
+
+@bot.command(
+  help='Changes the prefix of the bot to a user-specified prefix. This is per server, and can only be run by people with administrator.'
+)
+@commands.has_permissions(administrator = True)
+async def changePrefix(ctx, prefix):
+  db[str(ctx.guild.id)] = prefix
+  await ctx.send(f'Prefix changed to {prefix}!')
 
 @bot.command(
   help='Sends an inspiring quote'
