@@ -42,6 +42,16 @@ async def changePrefix(ctx, prefix):
   await ctx.send(f'Prefix changed to {prefix}!')
 
 @bot.command(
+  name='bugReport',
+  help='Use this to send me a bug report/tell me if the bot is offline. When sending a bug report, please tell me what command you ran than made the bug happen, as well as any messages the bot sent, if any. I may DM you about it if I need more information.'
+)
+async def bugReport(ctx, *, bug):
+  me = await bot.fetch_user(506915906568585226)
+  await me.send(bug)
+  reporter = await bot.fetch_user(ctx.author.id)
+  await me.send(f'Report submitted by: {reporter}')
+
+@bot.command(
   help='Sends an inspiring quote'
 )
 async def inspire(ctx):
