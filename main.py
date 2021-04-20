@@ -45,13 +45,21 @@ async def changePrefix(ctx, prefix):
   help='Use this to send me a bug report/tell me if the bot is offline. When sending a bug report, please tell me what command you ran than made the bug happen, as well as any messages the bot sent, if any. I may DM you about it if I need more information.'
 )
 async def bugReport(ctx, *, bug):
+  ctx.message.delete()
+  ctx.send('Bug report sent!')
+
   me = await bot.fetch_user(506915906568585226)
   await me.send(f'New bug report: {bug}')
   reporter = await bot.fetch_user(ctx.author.id)
   await me.send(f'Report submitted by: {reporter}')
 
-@bot.command()
+@bot.command(
+  help='Use this to send me a suggestion about something you think should be added, changed, or removed from the bot.'
+)
 async def suggestion(ctx, *, suggestion):
+  ctx.message.delete()
+  ctx.send('Suggestion sent!')
+
   me = await bot.fetch_user(506915906568585226)
   await me.send(f'New suggestion: {suggestion}')
   reporter = await bot.fetch_user(ctx.author.id)
