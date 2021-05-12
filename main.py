@@ -33,6 +33,16 @@ async def on_ready():
 async def on_guild_join(guild): 
   db[str(guild.id)] = '$'
 
+@bot.event
+async def on_message(msg):
+  if msg.author.id == '808555253317894163':
+    return
+  
+  if msg.content.startswith('prefix'):
+    await msg.channel.send(f'My prefix for this server is: {db[str(msg.guild.id)]}')
+
+  await bot.process_commands(msg)
+
 @bot.command(
   help='Changes the prefix of the bot to a user-specified prefix. This is per server, and can only be run by people with administrator.'
 )
@@ -113,11 +123,11 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
     await ctx.send('Time unit invalid! Valid time units are minutes, hours, and days!')
     return
 
-  vote_channel = get(ctx.guild.channels, name='voting')
+  # vote_channel = get(ctx.guild.channels, name='voting')
 
   await ctx.message.delete()
 
-  poll = await vote_channel.send('@everyone ' + issue)
+  poll = await ctx.send('@everyone ' + issue)
   pollID = poll.id
 
   issueChars = list(issue)
@@ -125,7 +135,7 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
   broke = False
 
   for count, value in enumerate(issueChars):
-    if count > 9:
+    if count > 19:
       broke = True
       break
 
@@ -133,7 +143,7 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
   if broke:
     issue = issue + '...'
 
-  await ctx.send('Poll sent!')
+  # await ctx.send('Poll sent!')
 
   for emoji in emojis:
     await poll.add_reaction(emoji)
@@ -150,7 +160,7 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
       reaction, user = await bot.wait_for('reaction_add', timeout=timeLimit, check=check)
       
     except:
-      msg = await vote_channel.fetch_message(pollID)
+      msg = await ctx.fetch_message(pollID)
       
       thumbUps = get(msg.reactions, emoji='👍')
       yay = thumbUps.count - 1
