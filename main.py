@@ -51,29 +51,36 @@ async def changePrefix(ctx, prefix):
   db[str(ctx.guild.id)] = prefix
   await ctx.send(f'Prefix changed to {prefix}!')
 
+# @bot.command(
+#   help='Use this to send me a bug report/tell me if the bot is offline. When sending a bug report, please tell me what command you ran than made the bug happen, as well as any messages the bot sent, if any. I may DM you about it if I need more information.'
+# )
+# async def bugReport(ctx, *, bug):
+#   ctx.message.delete()
+#   ctx.send('Bug report sent!')
+
+#   me = await bot.fetch_user(506915906568585226)
+#   await me.send(f'New bug report: {bug}')
+#   reporter = await bot.fetch_user(ctx.author.id)
+#   await me.send(f'Report submitted by: {reporter}')
+
+# @bot.command(
+#   help='Use this to send me a suggestion about something you think should be added, changed, or removed from the bot.'
+# )
+# async def suggestion(ctx, *, suggestion):
+#   ctx.message.delete()
+#   ctx.send('Suggestion sent!')
+
+#   me = await bot.fetch_user(506915906568585226)
+#   await me.send(f'New suggestion: {suggestion}')
+#   reporter = await bot.fetch_user(ctx.author.id)
+#   await me.send(f'Suggestion submitted by: {reporter}')
+
 @bot.command(
-  help='Use this to send me a bug report/tell me if the bot is offline. When sending a bug report, please tell me what command you ran than made the bug happen, as well as any messages the bot sent, if any. I may DM you about it if I need more information.'
+  help='Sends the invite to the support server for this bot'
 )
-async def bugReport(ctx, *, bug):
-  ctx.message.delete()
-  ctx.send('Bug report sent!')
-
-  me = await bot.fetch_user(506915906568585226)
-  await me.send(f'New bug report: {bug}')
-  reporter = await bot.fetch_user(ctx.author.id)
-  await me.send(f'Report submitted by: {reporter}')
-
-@bot.command(
-  help='Use this to send me a suggestion about something you think should be added, changed, or removed from the bot.'
-)
-async def suggestion(ctx, *, suggestion):
-  ctx.message.delete()
-  ctx.send('Suggestion sent!')
-
-  me = await bot.fetch_user(506915906568585226)
-  await me.send(f'New suggestion: {suggestion}')
-  reporter = await bot.fetch_user(ctx.author.id)
-  await me.send(f'Suggestion submitted by: {reporter}')
+async def support(ctx):
+  await ctx.send("Here's the link to the support server")
+  await ctx.send('https://discord.gg/HYPvTYf5')
 
 @bot.command(
   help='Sends an inspiring quote'
@@ -102,7 +109,7 @@ async def ping(ctx):
   await ctx.send(f'Latency: {round(bot.latency * 1000)} ms')
 
 @bot.command(
-  help='Creates a poll in the channel called "voting". There must be a voting channel for this to work. If the issue is more than one word long, you must put it in quotes "like this." The time unit defaults to being seconds, but you can specify it to be minutes, hours, or days. They must be spelled out completely and correctly, but capitalization does not matter'
+  help='Creates a poll in the channel the command is called. If the issue is more than one word long, you must put it in quotes "like this." The time unit defaults to being seconds, but you can specify it to be minutes, hours, or days. They must be spelled out completely and correctly, but capitalization does not matter'
 )
 async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
   try:
