@@ -11,126 +11,111 @@ from replit import db
 
 
 def get_prefix(client, message):
-  prefix = db[str(message.guild.id)]
-  return prefix
+	prefix = db[str(message.guild.id)]
+	return prefix
+
 
 bot = commands.Bot(command_prefix=get_prefix)
 
-emojis = ['👍', '👎']
-
 def get_quote():
-  response = requests.get('https://zenquotes.io/api/random')
-  json_data = json.loads(response.text)
-  quote = json_data[0]['q'] + ' -' + json_data[0]['a']
-  return quote
+	response = requests.get('https://zenquotes.io/api/random')
+	json_data = json.loads(response.text)
+	quote = json_data[0]['q'] + ' -' + json_data[0]['a']
+	return quote
+
 
 @bot.event
 async def on_ready():
-  print('Bot is ready')
-  await bot.change_presence(activity=discord.Game(name="use $help"))
+	print('Bot is ready')
+	await bot.change_presence(activity=discord.Game(name="use $help"))
+
 
 @bot.event
-async def on_guild_join(guild): 
-  db[str(guild.id)] = '$'
+async def on_guild_join(guild):
+	db[str(guild.id)] = '$'
+
 
 @bot.event
 async def on_message(msg):
   if msg.author.id == '808555253317894163':
     return
-  
-  if msg.content.startswith('prefix'):
-    await msg.channel.send(f'My prefix for this server is: {db[str(msg.guild.id)]}')
+
+  msgContent = msg.content.upper()
+
+  if msgContent.startswith('PREFIX'):
+    await msg.channel.send(
+		    f'My prefix for this server is: {db[str(msg.guild.id)]}')
 
   await bot.process_commands(msg)
 
+
 @bot.command(
-  help='Changes the prefix of the bot to a user-specified prefix. This is per server, and can only be run by people with administrator.'
+    help=
+    'Changes the prefix of the bot to a user-specified prefix. This is per server, and can only be run by people with administrator.'
 )
-@commands.has_permissions(administrator = True)
+@commands.has_permissions(administrator=True)
 async def changePrefix(ctx, prefix):
-  db[str(ctx.guild.id)] = prefix
-  await ctx.send(f'Prefix changed to {prefix}!')
+	db[str(ctx.guild.id)] = prefix
+	await ctx.send(f'Prefix changed to {prefix}!')
 
-# @bot.command(
-#   help='Use this to send me a bug report/tell me if the bot is offline. When sending a bug report, please tell me what command you ran than made the bug happen, as well as any messages the bot sent, if any. I may DM you about it if I need more information.'
-# )
-# async def bugReport(ctx, *, bug):
-#   ctx.message.delete()
-#   ctx.send('Bug report sent!')
 
-#   me = await bot.fetch_user(506915906568585226)
-#   await me.send(f'New bug report: {bug}')
-#   reporter = await bot.fetch_user(ctx.author.id)
-#   await me.send(f'Report submitted by: {reporter}')
-
-# @bot.command(
-#   help='Use this to send me a suggestion about something you think should be added, changed, or removed from the bot.'
-# )
-# async def suggestion(ctx, *, suggestion):
-#   ctx.message.delete()
-#   ctx.send('Suggestion sent!')
-
-#   me = await bot.fetch_user(506915906568585226)
-#   await me.send(f'New suggestion: {suggestion}')
-#   reporter = await bot.fetch_user(ctx.author.id)
-#   await me.send(f'Suggestion submitted by: {reporter}')
-
-@bot.command(
-  help='Sends the invite to the support server for this bot'
-)
+@bot.command(help='Sends the invite to the support server for this bot')
 async def support(ctx):
-  await ctx.send("Here's the link to the support server")
-  await ctx.send('https://discord.gg/HYPvTYf5')
+	await ctx.send("Here's the link to the support server")
+	await ctx.send('https://discord.gg/WrAkbkm59j')
 
-@bot.command(
-  help='Sends an inspiring quote'
-)
+
+@bot.command(help='Sends an inspiring quote')
 async def inspire(ctx):
-  quote = get_quote()
-  await ctx.send(quote)
+	quote = get_quote()
+	await ctx.send(quote)
 
-@bot.command(
-  help='Sends a random fun fact'
-)
+
+@bot.command(help='Sends a random fun fact')
 async def funfact(ctx):
-  fact = randfacts.getFact()
-  await ctx.send(fact)
+	fact = randfacts.getFact()
+	await ctx.send(fact)
 
-@bot.command(
-  help='Sends a random meme'
-)
+
+@bot.command(help='Sends a random meme')
 async def meme(ctx):
-  await ctx.send(embed=await pyrandmeme())
+	await ctx.send(embed=await pyrandmeme())
 
-@bot.command(
-  help='Shows the latency of the bot for you'
-)
+
+@bot.command(help='Shows the latency of the bot for you')
 async def ping(ctx):
-  await ctx.send(f'Latency: {round(bot.latency * 1000)} ms')
+	await ctx.send(f'Latency: {round(bot.latency * 1000)} ms')
+
 
 @bot.command(
-  help='Creates a poll in the channel the command is called. If the issue is more than one word long, you must put it in quotes "like this." The time unit defaults to being seconds, but you can specify it to be minutes, hours, or days. They must be spelled out completely and correctly, but capitalization does not matter'
+    help=
+    'Creates a poll in the channel the command is called. If the issue is more than one word long, you must put it in quotes "like this." The time limit can be any number with up to 7 decimal places, and the valid time units are seconds, minutes, hours, and days. If you want to specify the emojis used for yay and nay,but not the time, then put 0 for both time limit and time unit.'
 )
-async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
-  try:
-    timeLimit = float(timeLimit)
-  except ValueError:
-    await ctx.send('The time limit must be a number!')
-    return
+async def poll(ctx, issue, timeLimit=None, timeUnit=None, customYay='👍', customNay='👎'):
+  emojis = [customYay, customNay]
 
-  if timeUnit.upper() == 'SECONDS':
+  if timeLimit is not None:
+    try:
+      timeLimit = float(timeLimit)
+    except ValueError:
+      await ctx.send('The time limit must be a number!')
+      return
+
+  if timeLimit is None and timeUnit is None:
     pass
-  elif timeUnit.upper() == 'MINUTES':
+  elif timeUnit.upper().startswith('SEC'):
+    pass
+  elif timeUnit.upper().startswith('MIN'):
     timeLimit *= 60
-  elif timeUnit.upper() == 'HOURS':
+  elif timeUnit.upper().startswith('HOU'):
     timeLimit *= 3600
-  elif timeUnit.upper() == 'DAYS':
+  elif timeUnit.upper().startswith('DAY'):
     timeLimit *= 86400
   else:
-    await ctx.send('Time unit invalid! Valid time units are minutes, hours, and days!')
+    await ctx.send(
+		    "Time unit invalid! Valid time units are minutes, hours, and days! If you don't specify the time limit, then you also can't specify the time unit."
+		)
     return
-
-  # vote_channel = get(ctx.guild.channels, name='voting')
 
   await ctx.message.delete()
 
@@ -143,49 +128,51 @@ async def poll(ctx, issue, timeLimit, timeUnit='seconds'):
 
   for count, value in enumerate(issueChars):
     if count > 19:
-      broke = True
-      break
+    	broke = True
+    	break
 
     issue = issue + str(issueChars[count])
   if broke:
-    issue = issue + '...'
-
-  # await ctx.send('Poll sent!')
+  	issue = issue + '...'
 
   for emoji in emojis:
-    await poll.add_reaction(emoji)
+  	await poll.add_reaction(emoji)
 
   def check(reaction, user):
-    return user != '808555253317894163' and str(reaction.emoji) in ['👍', '👎']
+  	return user != '808555253317894163' and str(
+		    reaction.emoji) in [customYay, customNay]
 
-  yay = 0
-  nay = 0
-  loop = 0
+  if timeLimit is not None:
+    yay = 0
+    nay = 0
+    loop = 0
 
-  while loop == 0:
-    try:
-      reaction, user = await bot.wait_for('reaction_add', timeout=timeLimit, check=check)
-      
-    except:
-      msg = await ctx.fetch_message(pollID)
-      
-      thumbUps = get(msg.reactions, emoji='👍')
-      yay = thumbUps.count - 1
+    while loop == 0:
+      try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=timeLimit, check=check)
 
-      thumbDowns = get(msg.reactions, emoji='👎')
-      nay = thumbDowns.count - 1
+      except:
+        msg = await ctx.fetch_message(pollID)
 
+        thumbUps = get(msg.reactions, emoji=customYay)
+        yay = thumbUps.count - 1
 
-      await ctx.send(f'@everyone Here are the results of poll with the issue "{issue}": \nYay: {yay}\nNay: {nay}')
+        thumbDowns = get(msg.reactions, emoji=customNay)
+        nay = thumbDowns.count - 1
 
-      if yay > nay:
-        await ctx.send('The vote comes out to yay!')
-      elif yay < nay:
-        await ctx.send('The vote comes out to nay!')
-      elif yay == nay:
-        await ctx.send('The vote is a tie!')
-      
-      loop = 1
+        await ctx.send(
+            f'@everyone Here are the results of poll with the issue "{issue}": \nYay: {yay}\nNay: {nay}'
+        )
+
+        if yay > nay:
+          await ctx.send('The vote comes out to yay!')
+        elif yay < nay:
+          await ctx.send('The vote comes out to nay!')
+        elif yay == nay:
+          await ctx.send('The vote is a tie!')
+
+        loop = 1
+
 
 keep_alive()
 bot.run(os.getenv('TOKEN'))
